@@ -12,8 +12,7 @@ local allowedAnimals = {
     "La Supreme Combinasion", "Esok Sekolah", "Ketupat Kepat", 
     "Tralaledon", "Los Bros", "Los Hotspotsitos", 
     "Nuclearo Dinossauro", "Los Combinasionas", "La Grande Combinasion", 
-    "Chicleteira Bicicleteira", "La Karkerkar Combinasion", "Las Tralaleritas", 
-    "Los Tralaleritos", "Los Nooo My Hotspotsitos", "La Extinct Grande", 
+    "Chicleteira Bicicleteira", "La Karkerkar Combinasion", "Los Nooo My Hotspotsitos", "La Extinct Grande", 
     "Tacorita Bicicleta", "Urubini Flamenguini", "67"
 }
 
