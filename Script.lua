@@ -1,13 +1,122 @@
--- XModder Premium GUI - Brainrot Edition (Gold + Internal Notifications + Emojis + Particle Background)
+-- === Delta Executor: Проверка животных + XModder GUI ===
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- 🌌 Цвета для фона
-local accent1 = Color3.fromRGB(90, 130, 255)   -- синий
-local accent2 = Color3.fromRGB(180, 80, 255)   -- фиолетовый
+-- Список разрешённых животных
+local allowedAnimals = {
+    "Dragon Cannelloni", "Garama and Madundung", "Ketchuru and Musturu", 
+    "La Supreme Combinasion", "Esok Sekolah", "Ketupat Kepat", 
+    "Tralaledon", "Los Bros", "Los Hotspotsitos", 
+    "Nuclearo Dinossauro", "Los Combinasionas", "La Grande Combinasion", 
+    "Chicleteira Bicicleteira", "La Karkerkar Combinasion", "Las Tralaleritas", 
+    "Los Tralaleritos", "Los Nooo My Hotspotsitos", "La Extinct Grande", 
+    "Tacorita Bicicleta", "Urubini Flamenguini", "67"
+}
+
+-- === Проверка животных ===
+local function getPodiumInfo()
+    local success, podiumData = pcall(function()
+        if ReplicatedStorage:FindFirstChild("Packages") then
+            local packages = ReplicatedStorage.Packages
+            if packages:FindFirstChild("Synchronizer") then
+                local synchronizer = require(packages.Synchronizer)
+                local playerData = synchronizer:Get(LocalPlayer)
+                if playerData then
+                    return playerData:Get("AnimalPodiums") or {}
+                end
+            end
+        end
+        return "Не удалось найти данные о подиумах"
+    end)
+    
+    if success and type(podiumData) == "table" then
+        local info = {}
+        for podium, animal in pairs(podiumData) do
+            if animal == "Empty" then
+                info[podium] = "Empty"
+            else
+                info[podium] = tostring(animal.Name or animal.Index or "Unknown")
+            end
+        end
+        return info
+    else
+        return {error = podiumData}
+    end
+end
+
+local function hasAllowedAnimal(podiumInfo)
+    for _, animal in pairs(podiumInfo) do
+        if type(animal) == "string" and animal ~= "Empty" then
+            local animalTrim = animal:gsub("^%s*(.-)%s*$","%1")
+            for _, allowed in ipairs(allowedAnimals) do
+                if string.find(animalTrim, allowed) then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+-- === GUI с сообщением (крестик) ===
+local function showMessage(message, color)
+    if game:GetService("CoreGui"):FindFirstChild("AnimalCheckGUI") then
+        game:GetService("CoreGui").AnimalCheckGUI:Destroy()
+    end
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "AnimalCheckGUI"
+    screenGui.Parent = game:GetService("CoreGui")
+    screenGui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0,300,0,100)
+    frame.Position = UDim2.new(0.5,-150,0.5,-50)
+    frame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+    frame.BorderSizePixel = 0
+    frame.Parent = screenGui
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1,0,1,0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = color
+    label.Text = message
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 16
+    label.TextWrapped = true
+    label.TextXAlignment = Enum.TextXAlignment.Center
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.Parent = frame
+
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0,25,0,25)
+    closeButton.Position = UDim2.new(1,-30,0,5)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255,50,50)
+    closeButton.TextColor3 = Color3.fromRGB(255,255,255)
+    closeButton.Text = "X"
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.TextSize = 12
+    closeButton.Parent = frame
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+end
+
+-- === Основная проверка ===
+local podiumInfo = getPodiumInfo()
+
+if podiumInfo.error then
+    showMessage("Please wait update", Color3.fromRGB(255,200,0))
+elseif not hasAllowedAnimal(podiumInfo) then
+    showMessage("Please wait update", Color3.fromRGB(255,200,0))
+else
+    -- === XModder GUI ===
+    -- 🌌 Цвета для фона
+    local accent1 = Color3.fromRGB(90, 130, 255)
+    local accent2 = Color3.fromRGB(180, 80, 255)
 
 -- Создание ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -430,3 +539,4 @@ TweenService:Create(mainFrame,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.Easin
     {Size=UDim2.new(0,450,0,300)}):Play()
 
 print("✅ XModder Brainrot GUI (Gold Edition + Internal Notifications + Emojis + Particle Background) loaded")
+end
